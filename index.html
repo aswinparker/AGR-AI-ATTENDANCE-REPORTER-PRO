@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AGR AI Attendance Reporter Pro</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f4f6f9;margin:0}
+header{background:#0b2545;color:#fff;padding:20px;text-align:center}
+.container{max-width:1200px;margin:auto;padding:20px}
+.card{background:#fff;padding:20px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.1);margin-bottom:20px}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #ddd;padding:8px}
+th{background:#0b2545;color:#fff}
+input,select,textarea{width:100%;padding:8px;margin:5px 0}
+button{padding:10px 15px;border:none;border-radius:6px;background:#0b2545;color:#fff;cursor:pointer;margin:4px}
+.stats{display:flex;gap:15px;flex-wrap:wrap}
+.stat{flex:1;min-width:180px;background:#fff;padding:15px;border-radius:10px;text-align:center}
+</style>
+</head>
+<body>
+<header>
+<h1>AGR AI Attendance Reporter Pro</h1>
+<p>AGR & CO AI Construction Solutions</p>
+</header>
+
+<div class="container">
+
+<div class="stats">
+<div class="stat"><h3 id="presentCount">0</h3><p>Total Present Labour</p></div>
+<div class="stat"><h3 id="reportCount">0</h3><p>Reports Generated</p></div>
+</div>
+
+<div class="card">
+<h2>Project Details</h2>
+<input id="project" placeholder="Project Name">
+<input id="client" placeholder="Client Name">
+<input id="location" placeholder="Location">
+<input id="date" type="date">
+</div>
+
+<div class="card">
+<h2>Labour Attendance</h2>
+<table id="labourTable">
+<tr>
+<th>Name</th>
+<th>Category</th>
+<th>Present</th>
+</tr>
+</table>
+<button onclick="addRow()">Add Labour</button>
+</div>
+
+<div class="card">
+<h2>Work Progress</h2>
+<textarea id="progress"></textarea>
+<h2>Remarks</h2>
+<textarea id="remarks"></textarea>
+
+<button onclick="generateReport()">Generate Report</button>
+<button onclick="saveReport()">Save Report</button>
+<button onclick="shareWhatsApp()">WhatsApp Share</button>
+<button onclick="window.print()">Print</button>
+</div>
+
+<div class="card">
+<h2>Report Preview</h2>
+<div id="report"></div>
+</div>
+
+</div>
+
+<script>
+document.getElementById('date').value=new Date().toISOString().split('T')[0];
+let reports=0;
+
+function addRow(){
+const row=document.getElementById('labourTable').insertRow();
+row.innerHTML=`
+<td><input placeholder="Labour Name"></td>
+<td>
+<select>
+<option>Mason</option>
+<option>Helper</option>
+<option>Fitter</option>
+<option>Welder</option>
+<option>Electrician</option>
+<option>Carpenter</option>
+</select>
+</td>
+<td style="text-align:center"><input type="checkbox" checked></td>`;
+}
+addRow();
+
+function generateReport(){
+const rows=document.querySelectorAll('#labourTable tr');
+let present=0;
+let names='';
+
+for(let i=1;i<rows.length;i++){
+const name=rows[i].cells[0].querySelector('input').value;
+const cat=rows[i].cells[1].querySelector('select').value;
+const chk=rows[i].cells[2].querySelector('input').checked;
+
+if(chk){
+present++;
+names += name + ' - ' + cat + '<br>';
+}
+}
+
+presentCount.innerText=present;
+
+report.innerHTML=`
+<h3>AGR AI DAILY LABOUR REPORT</h3>
+<b>Project:</b> ${project.value}<br>
+<b>Client:</b> ${client.value}<br>
+<b>Location:</b> ${location.value}<br>
+<b>Date:</b> ${date.value}<br><br>
+
+<b>Present Labour:</b><br>
+${names || 'No labour entered'}<br>
+
+<b>Total Present Labour:</b> ${present}<br><br>
+
+<b>Work Progress:</b><br>
+${progress.value}<br><br>
+
+<b>Remarks:</b><br>
+${remarks.value}
+`;
+}
+
+function saveReport(){
+reports++;
+reportCount.innerText=reports;
+localStorage.setItem('agrAttendanceReport',report.innerHTML);
+alert('Report Saved');
+}
+
+function shareWhatsApp(){
+window.open('https://wa.me/?text='+encodeURIComponent(report.innerText));
+}
+</script>
+</body>
+</html>
