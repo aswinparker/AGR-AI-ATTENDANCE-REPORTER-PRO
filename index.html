@@ -55,7 +55,7 @@ footer{background:#0b2545;color:#fff;text-align:center;padding:15px;margin-top:2
 <button onclick="saveAttendance()">Save</button>
 <button onclick="generateMonthlyReport()">Monthly Report</button>
 <button onclick="shareWhatsApp()">WhatsApp</button>
-<button onclick="window.print()">Print</button>
+<button onclick="printReport()">Print</button>
 <div id="msg">Attendance Saved Successfully</div>
 </div>
 
@@ -148,6 +148,36 @@ monthlyReport.innerHTML=`Saved Records: ${rec.length}<br>Total Present: ${p}<br>
 function shareWhatsApp(){
 window.open('https://wa.me/?text='+encodeURIComponent(report.innerText));
 }
+ 
+function printReport() {
+    generateReport();
+
+    let printWindow = window.open('', '_blank');
+
+    printWindow.document.write(`
+    <html>
+    <head>
+        <title>Attendance Report</title>
+        <style>
+            body{font-family:Arial;padding:20px}
+            h2{text-align:center}
+        </style>
+    </head>
+    <body>
+        <h2>AGR AI Labour Attendance Report</h2>
+        ${report.innerHTML}
+    </body>
+    </html>
+    `);
+
+    printWindow.document.close();
+    printWindow.focus();
+
+    setTimeout(() => {
+        printWindow.print();
+    }, 500);
+}
+
 </script>
 </body>
 </html>
