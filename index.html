@@ -1,27 +1,100 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AGR AI Labour Attendance Pro</title>
+
 <style>
-body{font-family:Arial,sans-serif;background:#f4f6f9;margin:0}
-header{background:#0b2545;color:#fff;text-align:center;padding:20px}
-header h1{color:#d4af37;margin:10px 0}
-.container{max-width:1200px;margin:auto;padding:20px}
-.dashboard{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px}
-.card,.section{background:#fff;padding:20px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
-.section{margin-top:20px}
-table{width:100%;border-collapse:collapse}
-th,td{border:1px solid #ddd;padding:8px}
-th{background:#0b2545;color:#fff}
-input,select{width:100%;padding:8px;box-sizing:border-box}
-button{padding:10px 15px;margin:4px;border:none;border-radius:6px;background:#0b2545;color:#fff;cursor:pointer}
-#msg{display:none;background:#16a34a;color:#fff;padding:10px;border-radius:6px}
-footer{background:#0b2545;color:#fff;text-align:center;padding:15px;margin-top:20px}
+body{
+font-family:Arial,sans-serif;
+background:#f4f6f9;
+margin:0;
+}
+
+header{
+background:#0b2545;
+color:#fff;
+padding:20px;
+text-align:center;
+}
+
+header h1{
+color:#d4af37;
+margin:0;
+}
+
+.container{
+max-width:1200px;
+margin:auto;
+padding:20px;
+}
+
+.dashboard{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+gap:15px;
+}
+
+.card,.section{
+background:#fff;
+padding:15px;
+border-radius:10px;
+box-shadow:0 2px 8px rgba(0,0,0,.1);
+}
+
+.section{
+margin-top:20px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+th,td{
+border:1px solid #ddd;
+padding:8px;
+}
+
+th{
+background:#0b2545;
+color:#fff;
+}
+
+input,select{
+width:100%;
+padding:8px;
+margin:5px 0;
+box-sizing:border-box;
+}
+
+button{
+padding:10px 15px;
+margin:4px;
+border:none;
+border-radius:6px;
+background:#0b2545;
+color:white;
+cursor:pointer;
+}
+
+button:hover{
+opacity:.9;
+}
+
+footer{
+background:#0b2545;
+color:white;
+text-align:center;
+padding:15px;
+margin-top:20px;
+}
 </style>
 </head>
+
 <body>
+
 <header>
 <h1>AGR AI Labour Attendance Pro</h1>
 <p>AGR & CO AI Construction Solutions</p>
@@ -30,33 +103,57 @@ footer{background:#0b2545;color:#fff;text-align:center;padding:15px;margin-top:2
 <div class="container">
 
 <div class="dashboard">
-<div class="card"><h2 id="presentCount">0</h2><p>Present</p></div>
-<div class="card"><h2 id="absentCount">0</h2><p>Absent</p></div>
-<div class="card"><h2 id="totalCount">0</h2><p>Total Labour</p></div>
-<div class="card"><h2 id="attendancePercent">0%</h2><p>Attendance %</p></div>
+<div class="card">
+<h2 id="presentCount">0</h2>
+<p>Present</p>
+</div>
+
+<div class="card">
+<h2 id="absentCount">0</h2>
+<p>Absent</p>
+</div>
+
+<div class="card">
+<h2 id="totalCount">0</h2>
+<p>Total Labour</p>
+</div>
+
+<div class="card">
+<h2 id="attendancePercent">0%</h2>
+<p>Attendance %</p>
+</div>
 </div>
 
 <div class="section">
 <h3>Project Details</h3>
+
 <input id="project" placeholder="Project Name">
-<input id="date" type="date">
+
+<input type="date" id="date">
 </div>
 
 <div class="section">
 <h3>Labour Attendance</h3>
+
 <table id="labourTable">
-<tr><th>Name</th><th>Category</th><th>Present</th><th>Delete</th></tr>
+<tr>
+<th>ID</th>
+<th>Name</th>
+<th>Category</th>
+<th>Present</th>
+<th>Delete</th>
+</tr>
 </table>
+
 <button onclick="addRow()">+ Add Labour</button>
 </div>
 
 <div class="section">
 <button onclick="generateReport()">Generate Report</button>
-<button onclick="saveAttendance()">Save</button>
-<button onclick="generateMonthlyReport()">Monthly Report</button>
+<button onclick="saveAttendance()">Save Attendance</button>
+<button onclick="generateMonthlyReport()">Monthly Summary</button>
 <button onclick="shareWhatsApp()">WhatsApp</button>
 <button onclick="printReport()">Print</button>
-<div id="msg">Attendance Saved Successfully</div>
 </div>
 
 <div class="section">
@@ -65,8 +162,20 @@ footer{background:#0b2545;color:#fff;text-align:center;padding:15px;margin-top:2
 </div>
 
 <div class="section">
+<h3>Search Saved Records</h3>
+
+<input type="date" id="searchDate">
+
+<button onclick="searchRecords()">
+Search
+</button>
+
+<div id="savedRecords"></div>
+</div>
+
+<div class="section">
 <h3>Monthly Summary</h3>
-<div id="monthlyReport">No records saved.</div>
+<div id="monthlyReport"></div>
 </div>
 
 </div>
@@ -76,108 +185,309 @@ AGR & CO AI Construction Solutions
 </footer>
 
 <script>
-date.value=new Date().toISOString().split('T')[0];
+
+date.value =
+new Date().toISOString().split('T')[0];
 
 function addRow(){
-const row=labourTable.insertRow();
+
+let row =
+labourTable.insertRow();
+
 row.innerHTML=`
-<td><input placeholder="Labour Name"></td>
-<td><select>
+<td><input placeholder="ID"></td>
+
+<td><input placeholder="Name"></td>
+
+<td>
+<select>
 <option>Mason</option>
 <option>Helper</option>
-<option>Fitter</option>
 <option>Welder</option>
+<option>Fitter</option>
 <option>Electrician</option>
 <option>Carpenter</option>
-</select></td>
-<td style="text-align:center"><input type="checkbox" checked></td>
-<td><button onclick="this.closest('tr').remove()">X</button></td>`;
+</select>
+</td>
+
+<td style="text-align:center">
+<input type="checkbox" checked>
+</td>
+
+<td>
+<button onclick="this.closest('tr').remove()">
+X
+</button>
+</td>
+`;
 }
+
 for(let i=0;i<3;i++) addRow();
 
 function generateReport(){
-const rows=document.querySelectorAll('#labourTable tr');
-let p=0,a=0,pList='',aList='';
+
+const rows =
+document.querySelectorAll('#labourTable tr');
+
+let present=0;
+let absent=0;
+
+let html='';
 
 for(let i=1;i<rows.length;i++){
- const name=rows[i].cells[0].querySelector('input').value||'Unnamed';
- const cat=rows[i].cells[1].querySelector('select').value;
- const chk=rows[i].cells[2].querySelector('input').checked;
 
- if(chk){p++;pList+=`<li>${name} - ${cat}</li>`;}
- else{a++;aList+=`<li>${name} - ${cat}</li>`;}
+let id =
+rows[i].cells[0]
+.querySelector('input').value;
+
+let name =
+rows[i].cells[1]
+.querySelector('input').value;
+
+let cat =
+rows[i].cells[2]
+.querySelector('select').value;
+
+let status =
+rows[i].cells[3]
+.querySelector('input').checked;
+
+if(status) present++;
+else absent++;
+
+html += `
+<tr>
+<td>${id}</td>
+<td>${name}</td>
+<td>${cat}</td>
+<td>${status?'Present':'Absent'}</td>
+</tr>
+`;
 }
 
-const total=p+a;
-const percent=total?((p/total)*100).toFixed(2):0;
+let total=present+absent;
 
-presentCount.innerText=p;
-absentCount.innerText=a;
+let percent=
+total?
+((present/total)*100).toFixed(2)
+:0;
+
+presentCount.innerText=present;
+absentCount.innerText=absent;
 totalCount.innerText=total;
-attendancePercent.innerText=percent+'%';
+attendancePercent.innerText=
+percent+'%';
 
 report.innerHTML=`
 <b>Project:</b> ${project.value}<br>
 <b>Date:</b> ${date.value}<br><br>
-<h4>Present Labour</h4><ul>${pList}</ul>
-<h4>Absent Labour</h4><ul>${aList}</ul>
-<b>Present:</b> ${p}<br>
-<b>Absent:</b> ${a}<br>
+
+<table>
+<tr>
+<th>ID</th>
+<th>Name</th>
+<th>Category</th>
+<th>Status</th>
+</tr>
+
+${html}
+
+</table>
+
+<br>
+
+<b>Present:</b> ${present}<br>
+<b>Absent:</b> ${absent}<br>
 <b>Total:</b> ${total}<br>
-<b>Attendance:</b> ${percent}%`;
+<b>Attendance:</b> ${percent}%
+`;
 }
 
 function saveAttendance(){
-generateReport();
-let rec=JSON.parse(localStorage.getItem('AGR_MONTHLY')||'[]');
-rec.push({present:+presentCount.innerText,absent:+absentCount.innerText,date:date.value});
-localStorage.setItem('AGR_MONTHLY',JSON.stringify(rec));
-msg.style.display='block';
-setTimeout(()=>msg.style.display='none',3000);
+
+const rows =
+document.querySelectorAll('#labourTable tr');
+
+let labours=[];
+
+for(let i=1;i<rows.length;i++){
+
+labours.push({
+
+id:
+rows[i].cells[0]
+.querySelector('input').value,
+
+name:
+rows[i].cells[1]
+.querySelector('input').value,
+
+category:
+rows[i].cells[2]
+.querySelector('select').value,
+
+status:
+rows[i].cells[3]
+.querySelector('input').checked
+?
+'Present'
+:
+'Absent'
+
+});
+}
+
+let records=
+JSON.parse(
+localStorage.getItem(
+'AGR_LABOUR_RECORDS'
+)
+||'[]'
+);
+
+records.push({
+
+project:project.value,
+date:date.value,
+labours:labours
+
+});
+
+localStorage.setItem(
+'AGR_LABOUR_RECORDS',
+JSON.stringify(records)
+);
+
+alert('Attendance Saved');
+}
+
+function searchRecords(){
+
+let date=
+searchDate.value;
+
+let records=
+JSON.parse(
+localStorage.getItem(
+'AGR_LABOUR_RECORDS'
+)
+||'[]'
+);
+
+let html='';
+
+records
+.filter(r=>r.date===date)
+.forEach(r=>{
+
+html+=`
+<h4>${r.project}</h4>
+
+<table>
+
+<tr>
+<th>ID</th>
+<th>Name</th>
+<th>Category</th>
+<th>Status</th>
+</tr>
+`;
+
+r.labours.forEach(l=>{
+
+html+=`
+<tr>
+<td>${l.id}</td>
+<td>${l.name}</td>
+<td>${l.category}</td>
+<td>${l.status}</td>
+</tr>
+`;
+
+});
+
+html+='</table><br>';
+
+});
+
+savedRecords.innerHTML=
+html || 'No records found';
 }
 
 function generateMonthlyReport(){
-let rec=JSON.parse(localStorage.getItem('AGR_MONTHLY')||'[]');
-let p=0,a=0;
-rec.forEach(r=>{p+=r.present;a+=r.absent;});
-let t=p+a;
-let pct=t?((p/t)*100).toFixed(2):0;
-monthlyReport.innerHTML=`Saved Records: ${rec.length}<br>Total Present: ${p}<br>Total Absent: ${a}<br>Attendance: ${pct}%`;
+
+let records=
+JSON.parse(
+localStorage.getItem(
+'AGR_LABOUR_RECORDS'
+)
+||'[]'
+);
+
+let present=0;
+let absent=0;
+
+records.forEach(r=>{
+
+r.labours.forEach(l=>{
+
+if(l.status==='Present')
+present++;
+else
+absent++;
+
+});
+
+});
+
+let total=
+present+absent;
+
+let percent=
+total?
+((present/total)*100).toFixed(2)
+:0;
+
+monthlyReport.innerHTML=`
+Records Saved:
+${records.length}<br>
+
+Total Present:
+${present}<br>
+
+Total Absent:
+${absent}<br>
+
+Attendance:
+${percent}%
+`;
 }
 
 function shareWhatsApp(){
-window.open('https://wa.me/?text='+encodeURIComponent(report.innerText));
+
+window.open(
+'https://wa.me/?text='+
+encodeURIComponent(
+report.innerText
+)
+);
 }
- 
-function printReport() {
-    generateReport();
 
-    let printWindow = window.open('', '_blank');
+function printReport(){
 
-    printWindow.document.write(`
-    <html>
-    <head>
-        <title>Attendance Report</title>
-        <style>
-            body{font-family:Arial;padding:20px}
-            h2{text-align:center}
-        </style>
-    </head>
-    <body>
-        <h2>AGR AI Labour Attendance Report</h2>
-        ${report.innerHTML}
-    </body>
-    </html>
-    `);
+generateReport();
 
-    printWindow.document.close();
-    printWindow.focus();
+let w=
+window.open();
 
-    setTimeout(() => {
-        printWindow.print();
-    }, 500);
+w.document.write(
+report.innerHTML
+);
+
+w.print();
 }
 
 </script>
+
 </body>
 </html>
