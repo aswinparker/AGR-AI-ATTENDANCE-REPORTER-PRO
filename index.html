@@ -1,352 +1,58 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AGR AI Labour Attendance Pro</title>
-
-<style>
-body{
-font-family:Arial,sans-serif;
-background:#f4f6f9;
-margin:0;
-}
-
-header{
-background:#0b2545;
-color:#fff;
-padding:20px;
-text-align:center;
-}
-
-header h1{
-color:#d4af37;
-margin:0;
-}
-
-.container{
-max-width:1200px;
-margin:auto;
-padding:20px;
-}
-
-.dashboard{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-gap:15px;
-}
-
-.card,.section{
-background:#fff;
-padding:15px;
-border-radius:10px;
-box-shadow:0 2px 8px rgba(0,0,0,.1);
-}
-
-.section{
-margin-top:20px;
-}
-
-table{
-width:100%;
-border-collapse:collapse;
-}
-
-th,td{
-border:1px solid #ddd;
-padding:8px;
-}
-
-th{
-background:#0b2545;
-color:#fff;
-}
-
-input,select{
-width:100%;
-padding:8px;
-margin:5px 0;
-box-sizing:border-box;
-}
-
-button{
-padding:10px 15px;
-margin:4px;
-border:none;
-border-radius:6px;
-background:#0b2545;
-color:white;
-cursor:pointer;
-}
-
-button:hover{
-opacity:.9;
-}
-
-footer{
-background:#0b2545;
-color:white;
-text-align:center;
-padding:15px;
-margin-top:20px;
-}
-</style>
-</head>
-
-<body>
-
-<header>
-<h1>AGR AI Labour Attendance Pro</h1>
-<p>AGR & CO AI Construction Solutions</p>
-</header>
-
-<div class="container">
-
-<div class="dashboard">
-<div class="card">
-<h2 id="presentCount">0</h2>
-<p>Present</p>
-</div>
-
-<div class="card">
-<h2 id="absentCount">0</h2>
-<p>Absent</p>
-</div>
-
-<div class="card">
-<h2 id="totalCount">0</h2>
-<p>Total Labour</p>
-</div>
-
-<div class="card">
-<h2 id="attendancePercent">0%</h2>
-<p>Attendance %</p>
-</div>
-</div>
-
+<!-- Project Details -->
 <div class="section">
 <h3>Project Details</h3>
 
+<input id="enteredBy" placeholder="Entered By">
+
 <input id="project" placeholder="Project Name">
 
-<input type="date" id="date">
+<input id="date" type="date">
 </div>
 
-<div class="section">
-<h3>Labour Attendance</h3>
-
-<table id="labourTable">
-<tr>
-<th>ID</th>
-<th>Name</th>
-<th>Category</th>
-<th>Present</th>
-<th>Delete</th>
-</tr>
-</table>
-
-<button onclick="addRow()">+ Add Labour</button>
-</div>
-
-<div class="section">
-<button onclick="generateReport()">Generate Report</button>
-<button onclick="saveAttendance()">Save Attendance</button>
-<button onclick="generateMonthlyReport()">Monthly Summary</button>
-<button onclick="shareWhatsApp()">WhatsApp</button>
-<button onclick="printReport()">Print</button>
-</div>
-
-<div class="section">
-<h3>Daily Report</h3>
-<div id="report"></div>
-</div>
-
+<!-- Search Records -->
 <div class="section">
 <h3>Search Saved Records</h3>
 
 <input type="date" id="searchDate">
 
-<button onclick="searchRecords()">
-Search
-</button>
+<button onclick="searchRecords()">Search</button>
 
 <div id="savedRecords"></div>
 </div>
 
-<div class="section">
-<h3>Monthly Summary</h3>
-<div id="monthlyReport"></div>
-</div>
-
-</div>
-
-<footer>
-AGR & CO AI Construction Solutions
-</footer>
-
 <script>
-
-date.value =
-new Date().toISOString().split('T')[0];
-
-function addRow(){
-
-let row =
-labourTable.insertRow();
-
-row.innerHTML=`
-<td><input placeholder="ID"></td>
-
-<td><input placeholder="Name"></td>
-
-<td>
-<select>
-<option>Mason</option>
-<option>Helper</option>
-<option>Welder</option>
-<option>Fitter</option>
-<option>Electrician</option>
-<option>Carpenter</option>
-</select>
-</td>
-
-<td style="text-align:center">
-<input type="checkbox" checked>
-</td>
-
-<td>
-<button onclick="this.closest('tr').remove()">
-X
-</button>
-</td>
-`;
-}
-
-for(let i=0;i<3;i++) addRow();
-
-function generateReport(){
-
-const rows =
-document.querySelectorAll('#labourTable tr');
-
-let present=0;
-let absent=0;
-
-let html='';
-
-for(let i=1;i<rows.length;i++){
-
-let id =
-rows[i].cells[0]
-.querySelector('input').value;
-
-let name =
-rows[i].cells[1]
-.querySelector('input').value;
-
-let cat =
-rows[i].cells[2]
-.querySelector('select').value;
-
-let status =
-rows[i].cells[3]
-.querySelector('input').checked;
-
-if(status) present++;
-else absent++;
-
-html += `
-<tr>
-<td>${id}</td>
-<td>${name}</td>
-<td>${cat}</td>
-<td>${status?'Present':'Absent'}</td>
-</tr>
-`;
-}
-
-let total=present+absent;
-
-let percent=
-total?
-((present/total)*100).toFixed(2)
-:0;
-
-presentCount.innerText=present;
-absentCount.innerText=absent;
-totalCount.innerText=total;
-attendancePercent.innerText=
-percent+'%';
-
-report.innerHTML=`
-<b>Project:</b> ${project.value}<br>
-<b>Date:</b> ${date.value}<br><br>
-
-<table>
-<tr>
-<th>ID</th>
-<th>Name</th>
-<th>Category</th>
-<th>Status</th>
-</tr>
-
-${html}
-
-</table>
-
-<br>
-
-<b>Present:</b> ${present}<br>
-<b>Absent:</b> ${absent}<br>
-<b>Total:</b> ${total}<br>
-<b>Attendance:</b> ${percent}%
-`;
-}
 
 function saveAttendance(){
 
-const rows =
-document.querySelectorAll('#labourTable tr');
+generateReport();
+
+const rows=document.querySelectorAll('#labourTable tr');
 
 let labours=[];
 
 for(let i=1;i<rows.length;i++){
 
-labours.push({
+const labour={
+id:rows[i].cells[0].querySelector('input').value,
+name:rows[i].cells[1].querySelector('input').value,
+category:rows[i].cells[2].querySelector('select').value,
+status:rows[i].cells[3].querySelector('input').checked
+?'Present':'Absent'
+};
 
-id:
-rows[i].cells[0]
-.querySelector('input').value,
+labours.push(labour);
 
-name:
-rows[i].cells[1]
-.querySelector('input').value,
-
-category:
-rows[i].cells[2]
-.querySelector('select').value,
-
-status:
-rows[i].cells[3]
-.querySelector('input').checked
-?
-'Present'
-:
-'Absent'
-
-});
 }
 
 let records=
 JSON.parse(
-localStorage.getItem(
-'AGR_LABOUR_RECORDS'
-)
+localStorage.getItem('AGR_LABOUR_RECORDS')
 ||'[]'
 );
 
 records.push({
 
+enteredBy:enteredBy.value,
 project:project.value,
 date:date.value,
 labours:labours
@@ -358,19 +64,17 @@ localStorage.setItem(
 JSON.stringify(records)
 );
 
-alert('Attendance Saved');
+alert('Attendance Saved Successfully');
+
 }
 
 function searchRecords(){
 
-let date=
-searchDate.value;
+let date=searchDate.value;
 
 let records=
 JSON.parse(
-localStorage.getItem(
-'AGR_LABOUR_RECORDS'
-)
+localStorage.getItem('AGR_LABOUR_RECORDS')
 ||'[]'
 );
 
@@ -381,7 +85,19 @@ records
 .forEach(r=>{
 
 html+=`
-<h4>${r.project}</h4>
+<div style="margin-bottom:20px">
+
+<h4>Project: ${r.project}</h4>
+
+<p>
+<b>Entered By:</b>
+${r.enteredBy}
+</p>
+
+<p>
+<b>Date:</b>
+${r.date}
+</p>
 
 <table>
 
@@ -406,88 +122,16 @@ html+=`
 
 });
 
-html+='</table><br>';
+html+=`
+</table>
+</div>
+`;
 
 });
 
 savedRecords.innerHTML=
-html || 'No records found';
-}
+html || 'No Records Found';
 
-function generateMonthlyReport(){
-
-let records=
-JSON.parse(
-localStorage.getItem(
-'AGR_LABOUR_RECORDS'
-)
-||'[]'
-);
-
-let present=0;
-let absent=0;
-
-records.forEach(r=>{
-
-r.labours.forEach(l=>{
-
-if(l.status==='Present')
-present++;
-else
-absent++;
-
-});
-
-});
-
-let total=
-present+absent;
-
-let percent=
-total?
-((present/total)*100).toFixed(2)
-:0;
-
-monthlyReport.innerHTML=`
-Records Saved:
-${records.length}<br>
-
-Total Present:
-${present}<br>
-
-Total Absent:
-${absent}<br>
-
-Attendance:
-${percent}%
-`;
-}
-
-function shareWhatsApp(){
-
-window.open(
-'https://wa.me/?text='+
-encodeURIComponent(
-report.innerText
-)
-);
-}
-
-function printReport(){
-
-generateReport();
-
-let w=
-window.open();
-
-w.document.write(
-report.innerHTML
-);
-
-w.print();
 }
 
 </script>
-
-</body>
-</html>
