@@ -149,6 +149,157 @@ text-align:center;
 <h2>Projects</h2>
 <span id="projectCount">0</span>
 </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AGR AI Workforce Suite v11</title>
+
+<style>
+:root{
+--blue:#0b2545;
+--gold:#d4af37;
+--bg:#f4f6f9;
+--white:#ffffff;
+}
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
+
+body{
+background:var(--bg);
+}
+
+header{
+background:var(--blue);
+color:#fff;
+padding:15px;
+text-align:center;
+}
+
+header h1{
+color:var(--gold);
+}
+
+nav{
+background:#081b33;
+display:flex;
+overflow:auto;
+}
+
+nav button{
+flex:1;
+padding:12px;
+border:none;
+background:none;
+color:white;
+cursor:pointer;
+min-width:120px;
+}
+
+nav button:hover{
+background:var(--gold);
+color:black;
+}
+
+.container{
+padding:15px;
+max-width:1200px;
+margin:auto;
+}
+
+.cards{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:15px;
+margin-top:15px;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 2px 6px rgba(0,0,0,.1);
+text-align:center;
+}
+
+.card h2{
+color:var(--blue);
+margin-bottom:10px;
+}
+
+.card span{
+font-size:30px;
+font-weight:bold;
+color:var(--gold);
+}
+
+.page{
+display:none;
+}
+
+.active{
+display:block;
+}
+
+footer{
+margin-top:20px;
+background:var(--blue);
+color:white;
+padding:10px;
+text-align:center;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>AGR AI Workforce Suite v11</h1>
+<p>AGR & CO Construction ERP</p>
+</header>
+
+<nav>
+<button onclick="showPage('dashboard')">Dashboard</button>
+<button onclick="showPage('workers')">Workers</button>
+<button onclick="showPage('attendance')">Attendance</button>
+<button onclick="showPage('projects')">Projects</button>
+<button onclick="showPage('reports')">Reports</button>
+</nav>
+
+<div class="container">
+
+<!-- Dashboard -->
+<div id="dashboard" class="page active">
+
+<h2>Dashboard</h2>
+
+<div class="cards">
+
+<div class="card">
+<h2>Total Workers</h2>
+<span id="workersCount">0</span>
+</div>
+
+<div class="card">
+<h2>Present Today</h2>
+<span id="presentCount">0</span>
+</div>
+
+<div class="card">
+<h2>Absent Today</h2>
+<span id="absentCount">0</span>
+</div>
+
+<div class="card">
+<h2>Projects</h2>
+<span id="projectCount">0</span>
+</div>
 
 <div class="card">
 <h2>Attendance %</h2>
