@@ -1,0 +1,198 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AGR AI Workforce Suite - Dashboard</title><style>
+:root{
+ --blue:#0b2545;
+ --gold:#d4af37;
+ --bg:#f4f6f9;
+}
+
+body{
+ margin:0;
+ font-family:Arial,sans-serif;
+ background:var(--bg);
+}
+
+header{
+ background:var(--blue);
+ color:white;
+ text-align:center;
+ padding:15px;
+}
+
+header h1{
+ color:var(--gold);
+ margin:0;
+}
+
+.container{
+ max-width:1200px;
+ margin:auto;
+ padding:20px;
+}
+
+.cards{
+ display:grid;
+ grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+ gap:15px;
+}
+
+.card{
+ background:white;
+ padding:20px;
+ border-radius:10px;
+ text-align:center;
+ box-shadow:0 2px 6px rgba(0,0,0,.1);
+}
+
+.card h3{
+ color:var(--blue);
+ margin-bottom:10px;
+}
+
+.card span{
+ font-size:32px;
+ font-weight:bold;
+ color:var(--gold);
+}
+
+.refreshBtn{
+ width:100%;
+ padding:12px;
+ margin-bottom:15px;
+ border:none;
+ border-radius:6px;
+ background:var(--blue);
+ color:white;
+ cursor:pointer;
+}
+
+footer{
+ margin-top:20px;
+ background:var(--blue);
+ color:white;
+ text-align:center;
+ padding:10px;
+}
+</style></head><body><header>
+ <h1>AGR AI Workforce Suite</h1>
+ <p>Dashboard</p>
+</header><div class="container"><button class="refreshBtn" onclick="loadDashboard()">
+Refresh Dashboard
+</button><div class="cards"> <div class="card">
+  <h3>Total Workers</h3>
+  <span id="workersCount">0</span>
+ </div> <div class="card">
+  <h3>Present Today</h3>
+  <span id="presentCount">0</span>
+ </div> <div class="card">
+  <h3>Absent Today</h3>
+  <span id="absentCount">0</span>
+ </div> <div class="card">
+  <h3>Active Projects</h3>
+  <span id="projectCount">0</span>
+ </div> <div class="card">
+  <h3>Attendance %</h3>
+  <span id="attendancePercent">0%</span>
+ </div></div></div><footer>
+ AGR & CO © 2026
+</footer><script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+
+import {
+ getFirestore,
+ collection,
+ getDocs
+}
+from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+
+const firebaseConfig = {
+
+ apiKey:"YOUR_API_KEY",
+
+ authDomain:"agr-ai-laber-report.firebaseapp.com",
+
+ projectId:"agr-ai-laber-report",
+
+ storageBucket:"agr-ai-laber-report.firebasestorage.app",
+
+ messagingSenderId:"YOUR_SENDER_ID",
+
+ appId:"YOUR_APP_ID"
+
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+window.loadDashboard = async function(){
+
+ const workersSnap =
+ await getDocs(collection(db,"workers"));
+
+ document.getElementById("workersCount").innerText =
+ workersSnap.size;
+
+ const projectsSnap =
+ await getDocs(collection(db,"projects"));
+
+ let activeProjects = 0;
+
+ projectsSnap.forEach(doc=>{
+   const p = doc.data();
+   if(p.status === "Active"){
+     activeProjects++;
+   }
+ });
+
+ document.getElementById("projectCount").innerText =
+ activeProjects;
+
+ const attendanceSnap =
+ await getDocs(collection(db,"attendance"));
+
+ const today =
+ new Date().toISOString().split("T")[0];
+
+ let present = 0;
+ let absent = 0;
+
+ attendanceSnap.forEach(doc=>{
+
+   const a = doc.data();
+
+   if(a.date === today){
+
+     present += Number(a.present || 0);
+     absent += Number(a.absent || 0);
+
+   }
+
+ });
+
+ document.getElementById("presentCount").innerText =
+ present;
+
+ document.getElementById("absentCount").innerText =
+ absent;
+
+ const total = present + absent;
+
+ const percent =
+ total > 0
+ ? ((present / total) * 100).toFixed(1)
+ : 0;
+
+ document.getElementById("attendancePercent").innerText =
+ percent + "%";
+
+}
+
+loadDashboard();
+
+</script></body>
+</html>
