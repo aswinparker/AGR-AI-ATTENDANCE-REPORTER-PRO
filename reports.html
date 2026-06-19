@@ -1,0 +1,205 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AGR AI Workforce Suite - Reports</title><style>
+:root{
+ --blue:#0b2545;
+ --gold:#d4af37;
+ --bg:#f4f6f9;
+}
+
+body{
+ margin:0;
+ font-family:Arial,sans-serif;
+ background:var(--bg);
+}
+
+header{
+ background:var(--blue);
+ color:#fff;
+ text-align:center;
+ padding:15px;
+}
+
+header h1{
+ color:var(--gold);
+ margin:0;
+}
+
+.container{
+ max-width:1200px;
+ margin:auto;
+ padding:20px;
+}
+
+.card{
+ background:#fff;
+ padding:15px;
+ border-radius:10px;
+ margin-bottom:15px;
+ box-shadow:0 2px 5px rgba(0,0,0,.1);
+}
+
+input,button{
+ width:100%;
+ padding:10px;
+ margin:5px 0;
+ box-sizing:border-box;
+ border-radius:6px;
+ border:1px solid #ddd;
+}
+
+button{
+ background:var(--blue);
+ color:white;
+ border:none;
+ cursor:pointer;
+}
+
+table{
+ width:100%;
+ border-collapse:collapse;
+ margin-top:10px;
+}
+
+th,td{
+ border:1px solid #ddd;
+ padding:8px;
+}
+
+th{
+ background:var(--blue);
+ color:white;
+}
+
+.summary{
+ display:grid;
+ grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+ gap:10px;
+ margin-bottom:15px;
+}
+
+.summary div{
+ background:white;
+ padding:15px;
+ border-radius:10px;
+ text-align:center;
+ font-weight:bold;
+}
+
+@media print{
+ button,input,header{
+   display:none;
+ }
+ body{
+   background:white;
+ }
+}
+</style></head>
+<body><header>
+ <h1>AGR AI Workforce Suite</h1>
+ <p>Attendance Reports</p>
+</header><div class="container"><div class="card">
+ <input type="date" id="filterDate">
+ <button onclick="loadReports()">Load Reports</button>
+ <button onclick="window.print()">Print Report</button>
+</div><div class="summary">
+ <div>Total Records<br><span id="totalRecords">0</span></div>
+ <div>Total Present<br><span id="totalPresent">0</span></div>
+ <div>Total Absent<br><span id="totalAbsent">0</span></div>
+</div><div class="card"><table>
+<thead>
+<tr>
+ <th>Date</th>
+ <th>Project</th>
+ <th>Entered By</th>
+ <th>Total</th>
+ <th>Present</th>
+ <th>Absent</th>
+</tr>
+</thead><tbody id="reportTableBody"></tbody></table></div></div><script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+
+import {
+ getFirestore,
+ collection,
+ getDocs
+}
+from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+
+const firebaseConfig = {
+
+ apiKey:"YOUR_API_KEY",
+
+ authDomain:"agr-ai-laber-report.firebaseapp.com",
+
+ projectId:"agr-ai-laber-report",
+
+ storageBucket:"agr-ai-laber-report.firebasestorage.app",
+
+ messagingSenderId:"YOUR_SENDER_ID",
+
+ appId:"YOUR_APP_ID"
+
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+window.loadReports = async function(){
+
+ const tbody =
+ document.getElementById("reportTableBody");
+
+ tbody.innerHTML = "";
+
+ let totalRecords = 0;
+ let totalPresent = 0;
+ let totalAbsent = 0;
+
+ const filterDate =
+ document.getElementById("filterDate").value;
+
+ const snap =
+ await getDocs(collection(db,"attendance"));
+
+ snap.forEach(doc=>{
+
+   const d = doc.data();
+
+   if(filterDate && d.date !== filterDate){
+     return;
+   }
+
+   totalRecords++;
+   totalPresent += Number(d.present || 0);
+   totalAbsent += Number(d.absent || 0);
+
+   tbody.innerHTML += `
+   <tr>
+    <td>${d.date}</td>
+    <td>${d.project}</td>
+    <td>${d.enteredBy}</td>
+    <td>${d.totalLabours}</td>
+    <td>${d.present}</td>
+    <td>${d.absent}</td>
+   </tr>`;
+ });
+
+ document.getElementById("totalRecords").innerText =
+ totalRecords;
+
+ document.getElementById("totalPresent").innerText =
+ totalPresent;
+
+ document.getElementById("totalAbsent").innerText =
+ totalAbsent;
+}
+
+loadReports();
+
+</script></body>
+</html>
