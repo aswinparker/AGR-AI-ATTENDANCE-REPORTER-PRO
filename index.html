@@ -1,275 +1,205 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AGR AI Workforce Suite - Workers</title><style>
+<title>AGR AI Workforce Suite v11</title>
+
+<style>
 :root{
-  --blue:#0b2545;
-  --gold:#d4af37;
-  --bg:#f4f6f9;
+--blue:#0b2545;
+--gold:#d4af37;
+--bg:#f4f6f9;
+--white:#ffffff;
+}
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
 }
 
 body{
-  margin:0;
-  font-family:Arial,sans-serif;
-  background:var(--bg);
+background:var(--bg);
 }
 
 header{
-  background:var(--blue);
-  color:#fff;
-  text-align:center;
-  padding:15px;
+background:var(--blue);
+color:#fff;
+padding:15px;
+text-align:center;
 }
 
 header h1{
-  color:var(--gold);
-  margin:0;
+color:var(--gold);
+}
+
+nav{
+background:#081b33;
+display:flex;
+overflow:auto;
+}
+
+nav button{
+flex:1;
+padding:12px;
+border:none;
+background:none;
+color:white;
+cursor:pointer;
+min-width:120px;
+}
+
+nav button:hover{
+background:var(--gold);
+color:black;
 }
 
 .container{
-  max-width:1100px;
-  margin:auto;
-  padding:20px;
+padding:15px;
+max-width:1200px;
+margin:auto;
+}
+
+.cards{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:15px;
+margin-top:15px;
 }
 
 .card{
-  background:#fff;
-  padding:15px;
-  border-radius:10px;
-  margin-bottom:15px;
-  box-shadow:0 2px 5px rgba(0,0,0,.1);
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 2px 6px rgba(0,0,0,.1);
+text-align:center;
 }
 
-input,select,button{
-  width:100%;
-  padding:10px;
-  margin:5px 0;
-  box-sizing:border-box;
+.card h2{
+color:var(--blue);
+margin-bottom:10px;
 }
 
-button{
-  background:var(--blue);
-  color:white;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
+.card span{
+font-size:30px;
+font-weight:bold;
+color:var(--gold);
 }
 
-button:hover{
-  opacity:.9;
+.page{
+display:none;
 }
 
-table{
-  width:100%;
-  border-collapse:collapse;
-}
-
-th,td{
-  border:1px solid #ddd;
-  padding:8px;
-}
-
-th{
-  background:var(--blue);
-  color:white;
-}
-
-.deleteBtn{
-  background:#c62828;
-}
-
-.searchBox{
-  margin-bottom:10px;
+.active{
+display:block;
 }
 
 footer{
-  background:var(--blue);
-  color:white;
-  text-align:center;
-  padding:10px;
+margin-top:20px;
+background:var(--blue);
+color:white;
+padding:10px;
+text-align:center;
 }
-</style></head>
-<body><header>
-  <h1>AGR AI Workforce Suite</h1>
-  <p>Workers Management</p>
-</header><div class="container">  <div class="card"><h3>Add Worker</h3>
+</style>
+</head>
 
-<input id="workerId" placeholder="Worker ID">
+<body>
 
-<input id="workerName" placeholder="Worker Name">
+<header>
+<h1>AGR AI Workforce Suite v11</h1>
+<p>AGR & CO Construction ERP</p>
+</header>
 
-<input id="mobile" placeholder="Mobile Number">
+<nav>
+<button onclick="showPage('dashboard')">Dashboard</button>
+<button onclick="showPage('workers')">Workers</button>
+<button onclick="showPage('attendance')">Attendance</button>
+<button onclick="showPage('projects')">Projects</button>
+<button onclick="showPage('reports')">Reports</button>
+</nav>
 
-<select id="category">
-  <option>Supervisor</option>
-  <option>Mason</option>
-  <option>Carpenter</option>
-  <option>Helper</option>
-  <option>Electrician</option>
-  <option>Plumber</option>
-  <option>Welder</option>
-  <option>Painter</option>
-</select>
+<div class="container">
 
-<select id="status">
-  <option>Active</option>
-  <option>Inactive</option>
-</select>
+<!-- Dashboard -->
+<div id="dashboard" class="page active">
 
-<button onclick="saveWorker()">Save Worker</button>
+<h2>Dashboard</h2>
 
-  </div>  <div class="card"><input
-  id="search"
-  class="searchBox"
-  placeholder="Search Worker..."
-  onkeyup="filterWorkers()">
+<div class="cards">
 
-<table id="workerTable">
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Name</th>
-      <th>Mobile</th>
-      <th>Category</th>
-      <th>Status</th>
-      <th>Action</th>
-    </tr>
-  </thead>
-  <tbody id="workerBody"></tbody>
-</table>
+<div class="card">
+<h2>Total Workers</h2>
+<span id="workersCount">0</span>
+</div>
 
-  </div></div><footer>
-AGR & CO
-</footer><script type="module">
+<div class="card">
+<h2>Present Today</h2>
+<span id="presentCount">0</span>
+</div>
 
-import { initializeApp }
-from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+<div class="card">
+<h2>Absent Today</h2>
+<span id="absentCount">0</span>
+</div>
 
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  getDocs,
-  deleteDoc,
-  doc
+<div class="card">
+<h2>Projects</h2>
+<span id="projectCount">0</span>
+</div>
+
+<div class="card">
+<h2>Attendance %</h2>
+<span id="attendancePercent">0%</span>
+</div>
+
+</div>
+
+</div>
+
+<!-- Workers -->
+<div id="workers" class="page">
+<h2>Workers Module</h2>
+<p>Part 2 will be added here.</p>
+</div>
+
+<!-- Attendance -->
+<div id="attendance" class="page">
+<h2>Attendance Module</h2>
+<p>Part 3 will be added here.</p>
+</div>
+
+<!-- Projects -->
+<div id="projects" class="page">
+<h2>Projects Module</h2>
+<p>Part 4 will be added here.</p>
+</div>
+
+<!-- Reports -->
+<div id="reports" class="page">
+<h2>Reports Module</h2>
+<p>Part 5 will be added here.</p>
+</div>
+
+</div>
+
+<footer>
+AGR & CO © 2026
+</footer>
+
+<script>
+function showPage(pageId){
+
+document.querySelectorAll('.page')
+.forEach(page=>page.classList.remove('active'));
+
+document.getElementById(pageId)
+.classList.add('active');
+
 }
-from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+</script>
 
-const firebaseConfig = {
-  apiKey:"YOUR_API_KEY",
-  authDomain:"agr-ai-laber-report.firebaseapp.com",
-  projectId:"agr-ai-laber-report",
-  storageBucket:"agr-ai-laber-report.firebasestorage.app",
-  messagingSenderId:"YOUR_SENDER_ID",
-  appId:"YOUR_APP_ID"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-window.saveWorker = async function(){
-
-  const workerId =
-    document.getElementById("workerId").value;
-
-  const workerName =
-    document.getElementById("workerName").value;
-
-  const mobile =
-    document.getElementById("mobile").value;
-
-  const category =
-    document.getElementById("category").value;
-
-  const status =
-    document.getElementById("status").value;
-
-  if(!workerId || !workerName){
-    alert("Fill required fields");
-    return;
-  }
-
-  await addDoc(collection(db,"workers"),{
-    workerId,
-    name:workerName,
-    mobile,
-    category,
-    status,
-    createdAt:new Date().toISOString()
-  });
-
-  alert("Worker Saved");
-
-  loadWorkers();
-
-  document.getElementById("workerId").value="";
-  document.getElementById("workerName").value="";
-  document.getElementById("mobile").value="";
-}
-
-async function loadWorkers(){
-
-  const tbody =
-    document.getElementById("workerBody");
-
-  tbody.innerHTML="";
-
-  const snap =
-    await getDocs(collection(db,"workers"));
-
-  snap.forEach((d)=>{
-
-    const w = d.data();
-
-    tbody.innerHTML += `
-      <tr>
-        <td>${w.workerId}</td>
-        <td>${w.name}</td>
-        <td>${w.mobile || ''}</td>
-        <td>${w.category}</td>
-        <td>${w.status}</td>
-        <td>
-          <button
-            class="deleteBtn"
-            onclick="deleteWorker('${d.id}')">
-            Delete
-          </button>
-        </td>
-      </tr>
-    `;
-  });
-}
-
-window.deleteWorker = async function(id){
-
-  if(!confirm("Delete worker?")) return;
-
-  await deleteDoc(doc(db,"workers",id));
-
-  loadWorkers();
-}
-
-window.filterWorkers = function(){
-
-  const search =
-    document.getElementById("search")
-    .value.toLowerCase();
-
-  const rows =
-    document.querySelectorAll("#workerBody tr");
-
-  rows.forEach(row=>{
-
-    row.style.display =
-      row.innerText.toLowerCase()
-      .includes(search)
-      ? ""
-      : "none";
-  });
-}
-
-loadWorkers();
-
-</script></body>
+</body>
 </html>
