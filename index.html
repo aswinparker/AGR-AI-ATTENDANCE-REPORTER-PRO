@@ -1,105 +1,275 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AGR AI Labour Attendance Pro v4 Firebase</title>
-<style>
-body{font-family:Arial;background:#f4f6f9;margin:0}
-header,footer{background:#0b2545;color:#fff;text-align:center;padding:15px}
-h1{color:#d4af37}
-.container{max-width:1100px;margin:auto;padding:20px}
-.card{background:#fff;padding:15px;border-radius:10px;margin-bottom:15px}
-input,select,button{width:100%;padding:10px;margin:5px 0;box-sizing:border-box}
-button{background:#0b2545;color:#fff;border:none;border-radius:6px}
-table{width:100%;border-collapse:collapse}
-th,td{border:1px solid #ddd;padding:8px}
-th{background:#0b2545;color:#fff}
-</style>
-</head>
-<body>
-<header><h1>AGR AI Labour Attendance Pro v4 Firebase</h1></header>
-<div class="container">
-<div class="card">
-<input id="enteredBy" placeholder="Entered By">
-<input id="project" placeholder="Project Name">
-<input id="date" type="date">
-</div>
+<title>AGR AI Workforce Suite - Workers</title><style>
+:root{
+  --blue:#0b2545;
+  --gold:#d4af37;
+  --bg:#f4f6f9;
+}
 
-<div class="card">
-<table id="labourTable">
-<tr><th>ID</th><th>Name</th><th>Category</th><th>Present</th></tr>
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:var(--bg);
+}
+
+header{
+  background:var(--blue);
+  color:#fff;
+  text-align:center;
+  padding:15px;
+}
+
+header h1{
+  color:var(--gold);
+  margin:0;
+}
+
+.container{
+  max-width:1100px;
+  margin:auto;
+  padding:20px;
+}
+
+.card{
+  background:#fff;
+  padding:15px;
+  border-radius:10px;
+  margin-bottom:15px;
+  box-shadow:0 2px 5px rgba(0,0,0,.1);
+}
+
+input,select,button{
+  width:100%;
+  padding:10px;
+  margin:5px 0;
+  box-sizing:border-box;
+}
+
+button{
+  background:var(--blue);
+  color:white;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+button:hover{
+  opacity:.9;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th,td{
+  border:1px solid #ddd;
+  padding:8px;
+}
+
+th{
+  background:var(--blue);
+  color:white;
+}
+
+.deleteBtn{
+  background:#c62828;
+}
+
+.searchBox{
+  margin-bottom:10px;
+}
+
+footer{
+  background:var(--blue);
+  color:white;
+  text-align:center;
+  padding:10px;
+}
+</style></head>
+<body><header>
+  <h1>AGR AI Workforce Suite</h1>
+  <p>Workers Management</p>
+</header><div class="container">  <div class="card"><h3>Add Worker</h3>
+
+<input id="workerId" placeholder="Worker ID">
+
+<input id="workerName" placeholder="Worker Name">
+
+<input id="mobile" placeholder="Mobile Number">
+
+<select id="category">
+  <option>Supervisor</option>
+  <option>Mason</option>
+  <option>Carpenter</option>
+  <option>Helper</option>
+  <option>Electrician</option>
+  <option>Plumber</option>
+  <option>Welder</option>
+  <option>Painter</option>
+</select>
+
+<select id="status">
+  <option>Active</option>
+  <option>Inactive</option>
+</select>
+
+<button onclick="saveWorker()">Save Worker</button>
+
+  </div>  <div class="card"><input
+  id="search"
+  class="searchBox"
+  placeholder="Search Worker..."
+  onkeyup="filterWorkers()">
+
+<table id="workerTable">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Mobile</th>
+      <th>Category</th>
+      <th>Status</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody id="workerBody"></tbody>
 </table>
-<button onclick="addRow()">Add Labour</button>
-<button onclick="saveAttendance()">Save To Firebase</button>
-<button onclick="searchAttendance()">Load Records</button>
-</div>
 
-<div class="card" id="results"></div>
-</div>
+  </div></div><footer>
+AGR & CO
+</footer><script type="module">
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  doc
+}
+from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
 
 const firebaseConfig = {
- apiKey:"AIzaSyCFf3iuHtLwSaNf5b8DsxeiaAAFd9_54d4",
- authDomain:"agr-ai-laber-report.firebaseapp.com",
- projectId:"agr-ai-laber-report",
- storageBucket:"agr-ai-laber-report.firebasestorage.app",
- messagingSenderId:"827574665549",
- appId:"1:827574665549:web:d85833413b17aba9d87704"
+  apiKey:"YOUR_API_KEY",
+  authDomain:"agr-ai-laber-report.firebaseapp.com",
+  projectId:"agr-ai-laber-report",
+  storageBucket:"agr-ai-laber-report.firebasestorage.app",
+  messagingSenderId:"YOUR_SENDER_ID",
+  appId:"YOUR_APP_ID"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-window.addRow = function(){
-let row=document.getElementById('labourTable').insertRow();
-row.innerHTML=`<td><input></td><td><input></td>
-<td><select>
-<option>Supervisor</option>
-<option>Carpenter</option>
-<option>Mason</option>
-<option>Helper</option>
-<option>Electrician</option>
-</select></td>
-<td><input type="checkbox" checked></td>`;
+window.saveWorker = async function(){
+
+  const workerId =
+    document.getElementById("workerId").value;
+
+  const workerName =
+    document.getElementById("workerName").value;
+
+  const mobile =
+    document.getElementById("mobile").value;
+
+  const category =
+    document.getElementById("category").value;
+
+  const status =
+    document.getElementById("status").value;
+
+  if(!workerId || !workerName){
+    alert("Fill required fields");
+    return;
+  }
+
+  await addDoc(collection(db,"workers"),{
+    workerId,
+    name:workerName,
+    mobile,
+    category,
+    status,
+    createdAt:new Date().toISOString()
+  });
+
+  alert("Worker Saved");
+
+  loadWorkers();
+
+  document.getElementById("workerId").value="";
+  document.getElementById("workerName").value="";
+  document.getElementById("mobile").value="";
 }
 
-for(let i=0;i<3;i++) addRow();
-document.getElementById('date').value=new Date().toISOString().split('T')[0];
+async function loadWorkers(){
 
-window.saveAttendance = async function(){
-const rows=document.querySelectorAll('#labourTable tr');
-const labours=[];
-for(let i=1;i<rows.length;i++){
-labours.push({
-id:rows[i].cells[0].querySelector('input').value,
-name:rows[i].cells[1].querySelector('input').value,
-category:rows[i].cells[2].querySelector('select').value,
-status:rows[i].cells[3].querySelector('input').checked?'Present':'Absent'
-});
-}
-await addDoc(collection(db,'attendance'),{
-enteredBy:enteredBy.value,
-project:project.value,
-date:date.value,
-labours
-});
-alert('Saved to Firebase');
+  const tbody =
+    document.getElementById("workerBody");
+
+  tbody.innerHTML="";
+
+  const snap =
+    await getDocs(collection(db,"workers"));
+
+  snap.forEach((d)=>{
+
+    const w = d.data();
+
+    tbody.innerHTML += `
+      <tr>
+        <td>${w.workerId}</td>
+        <td>${w.name}</td>
+        <td>${w.mobile || ''}</td>
+        <td>${w.category}</td>
+        <td>${w.status}</td>
+        <td>
+          <button
+            class="deleteBtn"
+            onclick="deleteWorker('${d.id}')">
+            Delete
+          </button>
+        </td>
+      </tr>
+    `;
+  });
 }
 
-window.searchAttendance = async function(){
-const snap=await getDocs(collection(db,'attendance'));
-let html='';
-snap.forEach(doc=>{
-const d=doc.data();
-html += `<p><b>${d.project}</b> | ${d.date} | ${d.enteredBy}</p>`;
-});
-document.getElementById('results').innerHTML=html || 'No records';
+window.deleteWorker = async function(id){
+
+  if(!confirm("Delete worker?")) return;
+
+  await deleteDoc(doc(db,"workers",id));
+
+  loadWorkers();
 }
-</script>
-<footer>AGR & CO</footer>
-</body>
+
+window.filterWorkers = function(){
+
+  const search =
+    document.getElementById("search")
+    .value.toLowerCase();
+
+  const rows =
+    document.querySelectorAll("#workerBody tr");
+
+  rows.forEach(row=>{
+
+    row.style.display =
+      row.innerText.toLowerCase()
+      .includes(search)
+      ? ""
+      : "none";
+  });
+}
+
+loadWorkers();
+
+</script></body>
 </html>
