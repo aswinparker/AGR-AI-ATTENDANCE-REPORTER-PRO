@@ -1,0 +1,326 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AGR AI Workforce Suite - Attendance</title><style>
+:root{
+ --blue:#0b2545;
+ --gold:#d4af37;
+ --bg:#f4f6f9;
+}
+
+*{
+ margin:0;
+ padding:0;
+ box-sizing:border-box;
+ font-family:Arial,sans-serif;
+}
+
+body{
+ background:var(--bg);
+}
+
+header{
+ background:var(--blue);
+ color:white;
+ text-align:center;
+ padding:15px;
+}
+
+header h1{
+ color:var(--gold);
+}
+
+.container{
+ max-width:1200px;
+ margin:auto;
+ padding:20px;
+}
+
+.card{
+ background:white;
+ padding:15px;
+ border-radius:10px;
+ margin-bottom:15px;
+ box-shadow:0 2px 6px rgba(0,0,0,.1);
+}
+
+input,button{
+ width:100%;
+ padding:10px;
+ margin:5px 0;
+ border:1px solid #ddd;
+ border-radius:6px;
+}
+
+button{
+ background:var(--blue);
+ color:white;
+ border:none;
+ cursor:pointer;
+}
+
+table{
+ width:100%;
+ border-collapse:collapse;
+ margin-top:10px;
+}
+
+th,td{
+ border:1px solid #ddd;
+ padding:8px;
+}
+
+th{
+ background:var(--blue);
+ color:white;
+}
+
+.summary{
+ display:flex;
+ gap:10px;
+ flex-wrap:wrap;
+}
+
+.summary div{
+ flex:1;
+ min-width:150px;
+ background:white;
+ padding:15px;
+ border-radius:10px;
+ text-align:center;
+ font-weight:bold;
+}
+
+footer{
+ background:var(--blue);
+ color:white;
+ text-align:center;
+ padding:10px;
+ margin-top:20px;
+}
+</style></head><body><header>
+ <h1>AGR AI Workforce Suite</h1>
+ <p>Attendance Management</p>
+</header><div class="container"><div class="card">
+ <input id="enteredBy" placeholder="Entered By">
+ <input id="project" placeholder="Project Name">
+ <input id="date" type="date">
+</div><div class="summary">
+ <div>Total Workers<br><span id="totalWorkers">0</span></div>
+ <div>Present<br><span id="presentCount">0</span></div>
+ <div>Absent<br><span id="absentCount">0</span></div>
+</div><div class="card"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Name</th>
+<th>Category</th>
+<th>Present</th>
+</tr>
+</thead><tbody id="attendanceBody"></tbody></table><button onclick="saveAttendance()">
+Save Attendance
+</button></div><div class="card">
+<h3>Attendance History</h3>
+<div id="history"></div>
+</div></div><footer>
+AGR & CO © 2026
+</footer><script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+
+import {
+ getFirestore,
+ collection,
+ addDoc,
+ getDocs
+}
+from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+
+const firebaseConfig = {
+
+ apiKey:"YOUR_API_KEY",
+
+ authDomain:"agr-ai-laber-report.firebaseapp.com",
+
+ projectId:"agr-ai-laber-report",
+
+ storageBucket:"agr-ai-laber-report.firebasestorage.app",
+
+ messagingSenderId:"YOUR_SENDER_ID",
+
+ appId:"YOUR_APP_ID"
+
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+document.getElementById("date").value =
+new Date().toISOString().split("T")[0];
+
+async function loadWorkers(){
+
+ const body =
+ document.getElementById("attendanceBody");
+
+ body.innerHTML="";
+
+ const snap =
+ await getDocs(collection(db,"workers"));
+
+ let count = 0;
+
+ snap.forEach(doc=>{
+
+  const w = doc.data();
+
+  body.innerHTML += `
+  <tr>
+   <td>${w.workerId}</td>
+   <td>${w.name}</td>
+   <td>${w.category}</td>
+   <td>
+    <input
+     type="checkbox"
+     checked
+     onchange="updateSummary()">
+   </td>
+  </tr>
+  `;
+
+  count++;
+ });
+
+ document.getElementById("totalWorkers").innerText =
+ count;
+
+ updateSummary();
+}
+
+window.updateSummary = function(){
+
+ const checks =
+ document.querySelectorAll(
+ '#attendanceBody input[type="checkbox"]'
+ );
+
+ let present = 0;
+
+ checks.forEach(c=>{
+  if(c.checked) present++;
+ });
+
+ document.getElementById("presentCount")
+ .innerText = present;
+
+ document.getElementById("absentCount")
+ .innerText = checks.length - present;
+}
+
+window.saveAttendance = async function(){
+
+ const rows =
+ document.querySelectorAll(
+ '#attendanceBody tr'
+ );
+
+ const labours = [];
+
+ rows.forEach(row=>{
+
+  labours.push({
+
+   workerId:row.cells[0].innerText,
+
+   name:row.cells[1].innerText,
+
+   category:row.cells[2].innerText,
+
+   status:
+   row.cells[3]
+   .querySelector('input')
+   .checked
+   ? 'Present'
+   : 'Absent'
+
+  });
+
+ });
+
+ const present =
+ parseInt(
+ document.getElementById("presentCount")
+ .innerText
+ );
+
+ const absent =
+ parseInt(
+ document.getElementById("absentCount")
+ .innerText
+ );
+
+ await addDoc(collection(db,"attendance"),{
+
+  enteredBy:
+  document.getElementById("enteredBy").value,
+
+  project:
+  document.getElementById("project").value,
+
+  date:
+  document.getElementById("date").value,
+
+  totalLabours:labours.length,
+
+  present,
+  absent,
+  labours,
+
+  createdAt:
+  new Date().toISOString()
+
+ });
+
+ alert("Attendance Saved");
+
+ loadHistory();
+}
+
+async function loadHistory(){
+
+ const history =
+ document.getElementById("history");
+
+ history.innerHTML="";
+
+ const snap =
+ await getDocs(collection(db,"attendance"));
+
+ snap.forEach(doc=>{
+
+  const d = doc.data();
+
+  history.innerHTML += `
+   <div style="
+    border:1px solid #ddd;
+    padding:10px;
+    margin:5px 0;
+   ">
+    <b>${d.project}</b><br>
+    Date: ${d.date}<br>
+    Entered By: ${d.enteredBy}<br>
+    Present: ${d.present}<br>
+    Absent: ${d.absent}
+   </div>
+  `;
+ });
+
+}
+
+loadWorkers();
+loadHistory();
+
+</script></body>
+</html>
