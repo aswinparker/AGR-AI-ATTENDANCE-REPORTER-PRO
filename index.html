@@ -3,354 +3,147 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AGR AI Workforce Suite v11</title>
-
+<title>AGR AI Workforce Suite v13.1</title>
 <style>
-:root{
---blue:#0b2545;
---gold:#d4af37;
---bg:#f4f6f9;
---white:#ffffff;
-}
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,sans-serif;
-}
-
-body{
-background:var(--bg);
-}
-
-header{
-background:var(--blue);
-color:#fff;
-padding:15px;
-text-align:center;
-}
-
-header h1{
-color:var(--gold);
-}
-
-nav{
-background:#081b33;
-display:flex;
-overflow:auto;
-}
-
-nav button{
-flex:1;
-padding:12px;
-border:none;
-background:none;
-color:white;
-cursor:pointer;
-min-width:120px;
-}
-
-nav button:hover{
-background:var(--gold);
-color:black;
-}
-
-.container{
-padding:15px;
-max-width:1200px;
-margin:auto;
-}
-
-.cards{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-gap:15px;
-margin-top:15px;
-}
-
-.card{
-background:white;
-padding:20px;
-border-radius:10px;
-box-shadow:0 2px 6px rgba(0,0,0,.1);
-text-align:center;
-}
-
-.card h2{
-color:var(--blue);
-margin-bottom:10px;
-}
-
-.card span{
-font-size:30px;
-font-weight:bold;
-color:var(--gold);
-}
-
-.page{
-display:none;
-}
-
-.active{
-display:block;
-}
-
-footer{
-margin-top:20px;
-background:var(--blue);
-color:white;
-padding:10px;
-text-align:center;
-}
+:root{--blue:#0b2545;--gold:#d4af37;--bg:#f4f6f9}
+body{font-family:Arial,sans-serif;margin:0;background:var(--bg)}
+header,footer{background:var(--blue);color:#fff;text-align:center;padding:12px}
+h1{color:var(--gold);margin:0}
+nav{display:flex;flex-wrap:wrap;background:#081b33}
+nav button{flex:1;padding:10px;border:0;background:none;color:#fff}
+.page{display:none;padding:15px}.active{display:block}
+.card{background:#fff;padding:15px;border-radius:10px;margin:10px 0}
+input,button,textarea{width:100%;padding:10px;margin:5px 0;box-sizing:border-box}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #ddd;padding:8px}
+.dark{background:#111;color:#eee}.dark .card{background:#222}
+@media print{nav,button,input,textarea{display:none}}
 </style>
 </head>
-
 <body>
-
-<header>
-<h1>AGR AI Workforce Suite v11</h1>
-<p>AGR & CO Construction ERP</p>
-</header>
-
+<header><h1>AGR AI Workforce Suite v13.1</h1></header>
 <nav>
 <button onclick="showPage('dashboard')">Dashboard</button>
 <button onclick="showPage('workers')">Workers</button>
 <button onclick="showPage('attendance')">Attendance</button>
 <button onclick="showPage('projects')">Projects</button>
 <button onclick="showPage('reports')">Reports</button>
+<button onclick="showPage('settings')">Settings</button>
 </nav>
 
-<div class="container">
+<div id="dashboard" class="page active"><div class="card">
+<h3>Dashboard</h3>
+<p>Workers: <span id="dw"></span></p>
+<p>Projects: <span id="dp"></span></p>
+<p>Attendance: <span id="da"></span></p>
+</div></div>
 
-<!-- Dashboard -->
-<div id="dashboard" class="page active">
+<div id="workers" class="page"><div class="card">
+<input id="wname" placeholder="Worker Name">
+<input id="wcat" placeholder="Category">
+<button onclick="addWorker()">Add Worker</button>
+<table><thead><tr><th>ID</th><th>Name</th><th>Category</th><th>Action</th></tr></thead><tbody id="wbody"></tbody></table>
+</div></div>
 
-<h2>Dashboard</h2>
+<div id="attendance" class="page"><div class="card">
+<input id="aproj" placeholder="Project">
+<input id="adate" type="date">
+<input id="searchDate" type="date" onchange="searchAttendance()">
+<button onclick="addAttendance()">Save Attendance</button>
+<div id="alist"></div>
+</div></div>
 
-<div class="cards">
+<div id="projects" class="page"><div class="card">
+<input id="pname" placeholder="Project Name">
+<button onclick="addProject()">Add Project</button>
+<div id="plist"></div>
+</div></div>
 
-<div class="card">
-<h2>Total Workers</h2>
-<span id="workersCount">0</span>
-</div>
+<div id="reports" class="page"><div class="card">
+<button onclick="saveReport()">Save Report</button>
+<button onclick="window.print()">Print / Save PDF</button>
+<button onclick="backup()">Backup JSON</button>
+<input type="file" onchange="restore(event)">
+<textarea id="siteNotes" placeholder="Site Notes"></textarea>
+<button onclick="saveNotes()">Save Notes</button>
+<div id="savedReports"></div>
+</div></div>
 
-<div class="card">
-<h2>Present Today</h2>
-<span id="presentCount">0</span>
-</div>
+<div id="settings" class="page"><div class="card">
+<button onclick="toggleDark()">Dark Mode</button>
+<button onclick="resetData()">Reset Data</button>
+</div></div>
 
-<div class="card">
-<h2>Absent Today</h2>
-<span id="absentCount">0</span>
-</div>
-
-<div class="card">
-<h2>Projects</h2>
-<span id="projectCount">0</span>
-</div>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AGR AI Workforce Suite v11</title>
-
-<style>
-:root{
---blue:#0b2545;
---gold:#d4af37;
---bg:#f4f6f9;
---white:#ffffff;
-}
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,sans-serif;
-}
-
-body{
-background:var(--bg);
-}
-
-header{
-background:var(--blue);
-color:#fff;
-padding:15px;
-text-align:center;
-}
-
-header h1{
-color:var(--gold);
-}
-
-nav{
-background:#081b33;
-display:flex;
-overflow:auto;
-}
-
-nav button{
-flex:1;
-padding:12px;
-border:none;
-background:none;
-color:white;
-cursor:pointer;
-min-width:120px;
-}
-
-nav button:hover{
-background:var(--gold);
-color:black;
-}
-
-.container{
-padding:15px;
-max-width:1200px;
-margin:auto;
-}
-
-.cards{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-gap:15px;
-margin-top:15px;
-}
-
-.card{
-background:white;
-padding:20px;
-border-radius:10px;
-box-shadow:0 2px 6px rgba(0,0,0,.1);
-text-align:center;
-}
-
-.card h2{
-color:var(--blue);
-margin-bottom:10px;
-}
-
-.card span{
-font-size:30px;
-font-weight:bold;
-color:var(--gold);
-}
-
-.page{
-display:none;
-}
-
-.active{
-display:block;
-}
-
-footer{
-margin-top:20px;
-background:var(--blue);
-color:white;
-padding:10px;
-text-align:center;
-}
-</style>
-</head>
-
-<body>
-
-<header>
-<h1>AGR AI Workforce Suite v11</h1>
-<p>AGR & CO Construction ERP</p>
-</header>
-
-<nav>
-<button onclick="showPage('dashboard')">Dashboard</button>
-<button onclick="showPage('workers')">Workers</button>
-<button onclick="showPage('attendance')">Attendance</button>
-<button onclick="showPage('projects')">Projects</button>
-<button onclick="showPage('reports')">Reports</button>
-</nav>
-
-<div class="container">
-
-<!-- Dashboard -->
-<div id="dashboard" class="page active">
-
-<h2>Dashboard</h2>
-
-<div class="cards">
-
-<div class="card">
-<h2>Total Workers</h2>
-<span id="workersCount">0</span>
-</div>
-
-<div class="card">
-<h2>Present Today</h2>
-<span id="presentCount">0</span>
-</div>
-
-<div class="card">
-<h2>Absent Today</h2>
-<span id="absentCount">0</span>
-</div>
-
-<div class="card">
-<h2>Projects</h2>
-<span id="projectCount">0</span>
-</div>
-
-<div class="card">
-<h2>Attendance %</h2>
-<span id="attendancePercent">0%</span>
-</div>
-
-</div>
-
-</div>
-
-<!-- Workers -->
-<div id="workers" class="page">
-<h2>Workers Module</h2>
-<p>Part 2 will be added here.</p>
-</div>
-
-<!-- Attendance -->
-<div id="attendance" class="page">
-<h2>Attendance Module</h2>
-<p>Part 3 will be added here.</p>
-</div>
-
-<!-- Projects -->
-<div id="projects" class="page">
-<h2>Projects Module</h2>
-<p>Part 4 will be added here.</p>
-</div>
-
-<!-- Reports -->
-<div id="reports" class="page">
-<h2>Reports Module</h2>
-<p>Part 5 will be added here.</p>
-</div>
-
-</div>
-
-<footer>
-AGR & CO © 2026
-</footer>
+<footer>AGR & CO</footer>
 
 <script>
-function showPage(pageId){
+let workers=JSON.parse(localStorage.getItem('workers')||'[]');
+let projects=JSON.parse(localStorage.getItem('projects')||'[]');
+let attendance=JSON.parse(localStorage.getItem('attendance')||'[]');
 
-document.querySelectorAll('.page')
-.forEach(page=>page.classList.remove('active'));
-
-document.getElementById(pageId)
-.classList.add('active');
-
+function save(){
+localStorage.setItem('workers',JSON.stringify(workers));
+localStorage.setItem('projects',JSON.stringify(projects));
+localStorage.setItem('attendance',JSON.stringify(attendance));
 }
-</script>
+function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');}
 
+function addWorker(){
+if(!wname.value.trim()||!wcat.value.trim()) return alert('Enter worker details');
+workers.push({id:'AGR'+String(workers.length+1).padStart(3,'0'),name:wname.value,cat:wcat.value});
+wname.value='';wcat.value='';save();load();
+}
+function editWorker(i){
+let n=prompt('Name',workers[i].name);let c=prompt('Category',workers[i].cat);
+if(n&&c){workers[i].name=n;workers[i].cat=c;save();load();}
+}
+function deleteWorker(i){if(confirm('Delete?')){workers.splice(i,1);save();load();}}
+
+function addProject(){if(!pname.value.trim()) return; projects.push({name:pname.value}); pname.value=''; save(); load();}
+function deleteProject(i){projects.splice(i,1);save();load();}
+
+function addAttendance(){attendance.push({project:aproj.value,date:adate.value});save();load();}
+function deleteAttendance(i){attendance.splice(i,1);save();load();}
+function searchAttendance(){
+let d=searchDate.value;
+alist.innerHTML=attendance.filter(x=>!d||x.date===d).map((a,i)=>`<div class='card'>${a.project} - ${a.date} <button onclick="deleteAttendance(${i})">Delete</button></div>`).join('');
+}
+
+function saveReport(){
+let reports=JSON.parse(localStorage.getItem('reports')||'[]');
+reports.push({date:new Date().toLocaleString(),workers:workers.length,projects:projects.length,attendance:attendance.length});
+localStorage.setItem('reports',JSON.stringify(reports));
+loadReports();
+}
+function loadReports(){
+let reports=JSON.parse(localStorage.getItem('reports')||'[]');
+savedReports.innerHTML=reports.map(r=>`<div class='card'>${r.date}<br>W:${r.workers} P:${r.projects} A:${r.attendance}</div>`).join('');
+}
+
+function backup(){
+const data={workers,projects,attendance};
+const a=document.createElement('a');
+a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+a.download='AGR_Backup_'+new Date().toISOString().split('T')[0]+'.json';a.click();
+}
+function restore(e){
+const r=new FileReader();
+r.onload=x=>{let d=JSON.parse(x.target.result);workers=d.workers||[];projects=d.projects||[];attendance=d.attendance||[];save();load();};
+r.readAsText(e.target.files[0]);
+}
+function saveNotes(){localStorage.setItem('notes',siteNotes.value);}
+function toggleDark(){document.body.classList.toggle('dark');localStorage.setItem('darkMode',document.body.classList.contains('dark'));}
+function resetData(){if(confirm('Reset?')){localStorage.clear();location.reload();}}
+
+function load(){
+wbody.innerHTML=workers.map((w,i)=>`<tr><td>${w.id}</td><td>${w.name}</td><td>${w.cat}</td><td><button onclick="editWorker(${i})">Edit</button><button onclick="deleteWorker(${i})">Delete</button></td></tr>`).join('');
+plist.innerHTML=projects.map((p,i)=>`<div class='card'>${p.name} <button onclick="deleteProject(${i})">Delete</button></div>`).join('');
+searchAttendance();
+dw.textContent=workers.length;dp.textContent=projects.length;da.textContent=attendance.length;
+siteNotes.value=localStorage.getItem('notes')||'';
+loadReports();
+}
+window.onload=()=>{adate.value=new Date().toISOString().split('T')[0];if(localStorage.getItem('darkMode')==='true')document.body.classList.add('dark');load();}
+</script>
 </body>
 </html>
