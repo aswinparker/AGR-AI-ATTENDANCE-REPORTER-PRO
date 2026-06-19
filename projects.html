@@ -1,0 +1,271 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AGR AI Workforce Suite - Projects</title><style>
+:root{
+ --blue:#0b2545;
+ --gold:#d4af37;
+ --bg:#f4f6f9;
+}
+
+*{
+ margin:0;
+ padding:0;
+ box-sizing:border-box;
+ font-family:Arial,sans-serif;
+}
+
+body{
+ background:var(--bg);
+}
+
+header{
+ background:var(--blue);
+ color:white;
+ text-align:center;
+ padding:15px;
+}
+
+header h1{
+ color:var(--gold);
+}
+
+.container{
+ max-width:1200px;
+ margin:auto;
+ padding:20px;
+}
+
+.card{
+ background:white;
+ padding:15px;
+ border-radius:10px;
+ margin-bottom:15px;
+ box-shadow:0 2px 6px rgba(0,0,0,.1);
+}
+
+input,select,button{
+ width:100%;
+ padding:10px;
+ margin:5px 0;
+ border:1px solid #ddd;
+ border-radius:6px;
+}
+
+button{
+ background:var(--blue);
+ color:white;
+ border:none;
+ cursor:pointer;
+}
+
+button:hover{
+ opacity:.9;
+}
+
+.deleteBtn{
+ background:#c62828;
+}
+
+table{
+ width:100%;
+ border-collapse:collapse;
+ margin-top:10px;
+}
+
+th,td{
+ border:1px solid #ddd;
+ padding:8px;
+ text-align:left;
+}
+
+th{
+ background:var(--blue);
+ color:white;
+}
+
+footer{
+ background:var(--blue);
+ color:white;
+ text-align:center;
+ padding:10px;
+ margin-top:20px;
+}
+</style></head><body><header>
+ <h1>AGR AI Workforce Suite</h1>
+ <p>Project Management</p>
+</header><div class="container"> <div class="card">  <h2>Add Project</h2>  <input id="projectName" placeholder="Project Name">  <input id="location" placeholder="Location">  <input id="startDate" type="date">  <input id="supervisor" placeholder="Supervisor">  <select id="status">
+   <option>Active</option>
+   <option>Completed</option>
+   <option>On Hold</option>
+  </select>  <button onclick="saveProject()">
+   Save Project
+  </button> </div> <div class="card"><input
+id="searchBox"
+placeholder="Search Project..."
+onkeyup="filterProjects()">
+
+  <table>   <thead>
+    <tr>
+     <th>Project</th>
+     <th>Location</th>
+     <th>Start Date</th>
+     <th>Supervisor</th>
+     <th>Status</th>
+     <th>Action</th>
+    </tr>
+   </thead>   <tbody id="projectsTableBody">
+   </tbody>  </table> </div></div><footer>
+ AGR & CO © 2026
+</footer><script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+
+import {
+ getFirestore,
+ collection,
+ addDoc,
+ getDocs,
+ deleteDoc,
+ doc
+}
+from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+
+const firebaseConfig = {
+
+ apiKey:"YOUR_API_KEY",
+
+ authDomain:"agr-ai-laber-report.firebaseapp.com",
+
+ projectId:"agr-ai-laber-report",
+
+ storageBucket:"agr-ai-laber-report.firebasestorage.app",
+
+ messagingSenderId:"YOUR_SENDER_ID",
+
+ appId:"YOUR_APP_ID"
+
+};
+
+const app = initializeApp(firebaseConfig);
+
+const db = getFirestore(app);
+
+window.saveProject = async function(){
+
+ const projectName =
+ document.getElementById("projectName").value.trim();
+
+ const location =
+ document.getElementById("location").value.trim();
+
+ const startDate =
+ document.getElementById("startDate").value;
+
+ const supervisor =
+ document.getElementById("supervisor").value.trim();
+
+ const status =
+ document.getElementById("status").value;
+
+ if(!projectName){
+  alert("Enter Project Name");
+  return;
+ }
+
+ await addDoc(collection(db,"projects"),{
+
+  projectName,
+  location,
+  startDate,
+  supervisor,
+  status,
+
+  createdAt:
+  new Date().toISOString()
+
+ });
+
+ alert("Project Saved");
+
+ document.getElementById("projectName").value="";
+ document.getElementById("location").value="";
+ document.getElementById("supervisor").value="";
+
+ loadProjects();
+};
+
+async function loadProjects(){
+
+ const tbody =
+ document.getElementById("projectsTableBody");
+
+ tbody.innerHTML="";
+
+ const snap =
+ await getDocs(collection(db,"projects"));
+
+ snap.forEach((projectDoc)=>{
+
+  const p = projectDoc.data();
+
+  tbody.innerHTML += `
+  <tr>
+   <td>${p.projectName}</td>
+   <td>${p.location || ''}</td>
+   <td>${p.startDate || ''}</td>
+   <td>${p.supervisor || ''}</td>
+   <td>${p.status}</td>
+   <td>
+    <button
+     class="deleteBtn"
+     onclick="deleteProject('${projectDoc.id}')">
+     Delete
+    </button>
+   </td>
+  </tr>
+  `;
+
+ });
+
+}
+
+window.deleteProject = async function(id){
+
+ if(!confirm("Delete project?")) return;
+
+ await deleteDoc(doc(db,"projects",id));
+
+ loadProjects();
+
+};
+
+window.filterProjects = function(){
+
+ const value =
+ document.getElementById("searchBox")
+ .value.toLowerCase();
+
+ const rows =
+ document.querySelectorAll(
+ '#projectsTableBody tr'
+ );
+
+ rows.forEach(row=>{
+
+  row.style.display =
+  row.innerText.toLowerCase()
+  .includes(value)
+  ? ""
+  : "none";
+
+ });
+
+};
+
+loadProjects();
+
+</script></body>
+</html>
